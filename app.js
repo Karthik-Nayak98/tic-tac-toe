@@ -1,4 +1,4 @@
-const INFINTIY = 9999999,
+const INFINITY = 9999999,
   HUMAN = 'X',
   COMPUTER = 'O';
 
@@ -50,12 +50,12 @@ const minimax = function (board, isMax, height) {
   if (checkForDraw(board)) return 0;
 
   if (isMax) {
-    bestScore = -INFINTIY;
+    bestScore = -INFINITY;
     for (let i = 0; i < 9; ++i)
       if (board[i] === null) {
         board[i] = COMPUTER;
         if (checkForWin(board)) {
-          score = 10 - height;
+          score = 10 - height; // Subtracting height will reduce the steps to win
         } else {
           score = minimax(board, false, height + 1);
         }
@@ -63,7 +63,7 @@ const minimax = function (board, isMax, height) {
         bestScore = Math.max(score, bestScore);
       }
   } else {
-    bestScore = INFINTIY;
+    bestScore = INFINITY;
     for (let i = 0; i < 9; ++i)
       if (board[i] === null) {
         board[i] = HUMAN;
@@ -99,13 +99,24 @@ const updateArray = function (index, turnValue) {
   }
 };
 
+// Removing the eventListener for columns
+const removeListener = function () {
+  columns.forEach(function (column, index) {
+    let new_column = column.cloneNode(true); // creating the clone of the existing node.
+    column.parentNode.replaceChild(new_column, column);
+  });
+};
+
+// Display winner or tie
 const displayResult = function (turnValue) {
   if (checkForWin(board)) {
     winner.textContent = `${turnValue} Wins`;
-    return;
+    removeListener();
+    return true;
   }
   if (checkForDraw(board)) {
     winner.textContent = `Game is a Tie`;
+    removeListener();
     return;
   }
   changeTurnValue();
@@ -114,15 +125,14 @@ const displayResult = function (turnValue) {
 const beginGame = function () {
   columns.forEach(function (column, index) {
     column.addEventListener('click', function (e) {
-      updateArray(index, HUMAN);
-      displayResult(turnValue);
-      // changeTurnValue();
+      let bestScore = -INFINITY,
+        bestIndex = -1,
+        score;
 
-      let bestScore = -INFINTIY;
-      let bestIndex = -1;
-      let score;
+      updateArray(index, HUMAN);
+      console.log(displayResult(turnValue));
+
       for (let i = 0; i < 9; ++i) {
-        // console.log(`height ${height}`);
         if (board[i] === null) {
           board[i] = COMPUTER;
           score = minimax(board, false, 0);
@@ -140,10 +150,5 @@ const beginGame = function () {
   });
 };
 
-// console.log(board);
 updateArray();
-
 result = beginGame();
-columns.forEach(function (column, index) {
-  column.removeEventListener('click', function () {});
-});
