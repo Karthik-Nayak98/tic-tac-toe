@@ -3,9 +3,10 @@ const INFINITY = 9999999,
   COMPUTER = 'O';
 
 const columns = document.querySelectorAll('.column'),
-  winner = document.querySelector('.winner');
+  winner = document.querySelector('.winner'),
+  restart = document.querySelector('.restart');
 
-// Setting scores for wins and ties for players
+// Setting scores for both players
 const scores = {
   X: -10,
   O: 10,
@@ -43,7 +44,7 @@ const checkForWin = function (board) {
   return false;
 };
 
-const minimax = function (board, isMax, height) {
+const minimax = function (board, isMax, height, alpha, beta) {
   let score, bestScore;
 
   if (checkForWin(board)) return scores[turnValue];
@@ -57,10 +58,12 @@ const minimax = function (board, isMax, height) {
         if (checkForWin(board)) {
           score = 10 - height; // Subtracting height will reduce the steps to win
         } else {
-          score = minimax(board, false, height + 1);
+          score = minimax(board, false, height + 1, alpha, beta);
         }
         board[i] = null; // Reverting to the original value
         bestScore = Math.max(score, bestScore);
+        alpha = Math.max(alpha, score);
+        if (beta <= alpha) break;
       }
   } else {
     bestScore = INFINITY;
@@ -70,17 +73,19 @@ const minimax = function (board, isMax, height) {
         if (checkForWin(board)) {
           score = -10 + height;
         } else {
-          score = minimax(board, true, height + 1);
+          score = minimax(board, true, height + 1, alpha, beta);
         }
         // Reverting to the original value
-        bestScore = Math.min(score, bestScore);
         board[i] = null;
+        bestScore = Math.min(score, bestScore);
+        beta = Math.min(beta, score);
+        if (beta <= alpha) break;
       }
   }
   return bestScore;
 };
 
-winner.textContent = '';
+// winner.textContent = '';
 
 const checkForDraw = function (board) {
   for (let i = 0; i < 9; ++i) if (board[i] === null) return false;
@@ -92,10 +97,12 @@ const changeTurnValue = function () {
   turnValue = turnValue === HUMAN ? COMPUTER : HUMAN;
 };
 
-const updateArray = function (index, turnValue) {
+const updateBoard = function (index, turnValue) {
   if (board[index] === null) board[index] = turnValue;
   for (let i = 0; i < 9; ++i) {
     columns[i].innerHTML = board[i];
+    if (columns[i].innerHTML === HUMAN) columns[i].style.color = '#be0000';
+    else columns[i].style.color = '#f0c929';
   }
 };
 
@@ -111,31 +118,31 @@ const removeListener = function () {
 const displayResult = function (turnValue) {
   if (checkForWin(board)) {
     winner.textContent = `${turnValue} Wins`;
-    removeListener();
+    // removeListener();
     return true;
   }
   if (checkForDraw(board)) {
-    winner.textContent = `Game is a Tie`;
-    removeListener();
-    return;
+    winner.textContent = `Game is a Tie !!!`;
+    // removeListener();
+    return true;
   }
   changeTurnValue();
 };
 
 const beginGame = function () {
   columns.forEach(function (column, index) {
-    column.addEventListener('click', function (e) {
+    column.addEventListener('click', function () {
       let bestScore = -INFINITY,
         bestIndex = -1,
         score;
 
-      updateArray(index, HUMAN);
-      console.log(displayResult(turnValue));
+      updateBoard(index, HUMAN);
+      displayResult(turnValue);
 
       for (let i = 0; i < 9; ++i) {
         if (board[i] === null) {
           board[i] = COMPUTER;
-          score = minimax(board, false, 0);
+          score = minimax(board, false, 0, -INFINITY, INFINITY);
           board[i] = null;
         }
         if (score > bestScore) {
@@ -143,12 +150,12 @@ const beginGame = function () {
           bestIndex = i;
         }
       }
-      updateArray(bestIndex, COMPUTER);
+      updateBoard(bestIndex, COMPUTER);
       checkForWin(board);
       displayResult(turnValue);
     });
   });
 };
 
-updateArray();
-result = beginGame();
+updateBoard();
+beginGame();
