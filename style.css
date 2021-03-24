@@ -69,16 +69,3 @@ h2 {
   font-size: 1.5rem;
   color: #0033cc;
 }
-
-.restart {
-  width: 5rem;
-  height: 2rem;
-  background-color: #007580;
-  font-weight: 600;
-  font-size: 1rem;
-  border-radius: 0.3rem;
-  border: none;
-  outline: none;
-  color: #d8ebe4;
-  cursor: pointer;
-}
