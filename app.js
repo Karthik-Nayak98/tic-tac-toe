@@ -1,10 +1,11 @@
 const INFINITY = 9999999,
-  HUMAN = 'X',
-  COMPUTER = 'O';
+      HUMAN = 'X',
+      COMPUTER = 'O',
+      BOARDSIZE = 9;
 
 const columns = document.querySelectorAll('.column'),
-  winner = document.querySelector('.winner'),
-  restart = document.querySelector('.restart');
+      winner = document.querySelector('.winner'),
+      restart = document.querySelector('.restart');
 
 // Setting scores for both players
 const scores = {
@@ -13,11 +14,22 @@ const scores = {
 };
 
 let board = new Array(9).fill(null),
+    turnValue = HUMAN;
+
+// Resetting the Game
+const restartGame = function () {
+  winner.textContent = '';
+  for (let i = 0; i < 9; ++i) columns[i].innerHTML = '';
+  board = new Array(9).fill(null);
   turnValue = HUMAN;
+  updateBoard();
+  beginGame();
+};
+restart.addEventListener('click', restartGame);
 
 const checkForWin = function (board) {
   //Checking the columns
-  for (let i = 0; i < 3; i++)
+  for (let i = 0; i < BOARDSIZE / 3; ++i)
     if (
       board[i] != null &&
       board[i] === board[i + 3] &&
@@ -26,7 +38,7 @@ const checkForWin = function (board) {
       return true;
 
   // Checking for Rows
-  for (let i = 0; i < 9; i = i + 3)
+  for (let i = 0; i < BOARDSIZE; i = i + 3)
     if (
       board[i] != null &&
       board[i] === board[i + 1] &&
@@ -52,7 +64,7 @@ const minimax = function (board, isMax, height, alpha, beta) {
 
   if (isMax) {
     bestScore = -INFINITY;
-    for (let i = 0; i < 9; ++i)
+    for (let i = 0; i < BOARDSIZE; ++i)
       if (board[i] === null) {
         board[i] = COMPUTER;
         if (checkForWin(board)) {
@@ -67,7 +79,7 @@ const minimax = function (board, isMax, height, alpha, beta) {
       }
   } else {
     bestScore = INFINITY;
-    for (let i = 0; i < 9; ++i)
+    for (let i = 0; i < BOARDSIZE; ++i)
       if (board[i] === null) {
         board[i] = HUMAN;
         if (checkForWin(board)) {
@@ -85,10 +97,8 @@ const minimax = function (board, isMax, height, alpha, beta) {
   return bestScore;
 };
 
-// winner.textContent = '';
-
 const checkForDraw = function (board) {
-  for (let i = 0; i < 9; ++i) if (board[i] === null) return false;
+  for (let i = 0; i < BOARDSIZE; ++i) if (board[i] === null) return false;
   return true;
 };
 
@@ -99,7 +109,7 @@ const changeTurnValue = function () {
 
 const updateBoard = function (index, turnValue) {
   if (board[index] === null) board[index] = turnValue;
-  for (let i = 0; i < 9; ++i) {
+  for (let i = 0; i < BOARDSIZE; ++i) {
     columns[i].innerHTML = board[i];
     if (columns[i].innerHTML === HUMAN) columns[i].style.color = '#be0000';
     else columns[i].style.color = '#f0c929';
@@ -108,52 +118,58 @@ const updateBoard = function (index, turnValue) {
 
 // Removing the eventListener for columns
 const removeListener = function () {
-  columns.forEach(function (column, index) {
-    let new_column = column.cloneNode(true); // creating the clone of the existing node.
-    column.parentNode.replaceChild(new_column, column);
+  columns.forEach(function (column) {
+    column.removeEventListener('click', startMove);
   });
+  // columns.forEach(function (column, index) {
+  //   let new_column = column.cloneNode(true); // creating the clone of the existing node.
+  //   column.parentNode.replaceChild(new_column, column);
+  // });
 };
 
 // Display winner or tie
 const displayResult = function (turnValue) {
   if (checkForWin(board)) {
     winner.textContent = `${turnValue} Wins`;
-    // removeListener();
+    removeListener();
     return true;
   }
   if (checkForDraw(board)) {
     winner.textContent = `Game is a Tie !!!`;
-    // removeListener();
+    removeListener();
     return true;
   }
   changeTurnValue();
 };
 
+function startMove(event) {
+  let index = event.target.dataset.value,
+      bestScore = -INFINITY,
+      bestIndex = -1,
+      score;
+
+  updateBoard(index, HUMAN);
+  if (displayResult(turnValue)) return true;
+
+  for (let i = 0; i < BOARDSIZE; ++i) {
+    if (board[i] === null) {
+      board[i] = COMPUTER;
+      score = minimax(board, false, 0, -INFINITY, INFINITY);
+      board[i] = null;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = i;
+    }
+  }
+  updateBoard(bestIndex, COMPUTER);
+  checkForWin(board);
+  displayResult(turnValue);
+}
+
 const beginGame = function () {
   columns.forEach(function (column, index) {
-    column.addEventListener('click', function () {
-      let bestScore = -INFINITY,
-        bestIndex = -1,
-        score;
-
-      updateBoard(index, HUMAN);
-      displayResult(turnValue);
-
-      for (let i = 0; i < 9; ++i) {
-        if (board[i] === null) {
-          board[i] = COMPUTER;
-          score = minimax(board, false, 0, -INFINITY, INFINITY);
-          board[i] = null;
-        }
-        if (score > bestScore) {
-          bestScore = score;
-          bestIndex = i;
-        }
-      }
-      updateBoard(bestIndex, COMPUTER);
-      checkForWin(board);
-      displayResult(turnValue);
-    });
+    column.addEventListener('click', startMove);
   });
 };
 
