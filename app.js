@@ -18,12 +18,11 @@ let board = new Array(9).fill(null),
 
 // Resetting the Game
 const restartGame = function () {
-  winner.textContent = '';
   for (let i = 0; i < 9; ++i) columns[i].innerHTML = '';
   board = new Array(9).fill(null);
   turnValue = HUMAN;
-  updateBoard();
   beginGame();
+  winner.textContent = '';
 };
 restart.addEventListener('click', restartGame);
 
