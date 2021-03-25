@@ -1,11 +1,11 @@
 const INFINITY = 9999999,
-      HUMAN = 'X',
-      COMPUTER = 'O',
-      BOARDSIZE = 9;
+  HUMAN = 'X',
+  COMPUTER = 'O',
+  BOARDSIZE = 9;
 
 const columns = document.querySelectorAll('.column'),
-      winner = document.querySelector('.winner'),
-      restart = document.querySelector('.restart');
+  winner = document.querySelector('.winner'),
+  restart = document.querySelector('.restart');
 
 // Setting scores for both players
 const scores = {
@@ -14,7 +14,7 @@ const scores = {
 };
 
 let board = new Array(9).fill(null),
-    turnValue = HUMAN;
+  turnValue = HUMAN;
 
 // Resetting the Game
 const restartGame = function () {
@@ -108,7 +108,16 @@ const changeTurnValue = function () {
 };
 
 const updateBoard = function (index, turnValue) {
-  if (board[index] === null) board[index] = turnValue;
+  if (board[index] === null) {
+    board[index] = turnValue;
+    winner.textContent = '';
+    winner.style.color = '#0033cc';
+  } else {
+    winner.textContent = 'Invalid Move!!!';
+    winner.style.color = '#be0000';
+    updateBoard();
+  }
+
   for (let i = 0; i < BOARDSIZE; ++i) {
     columns[i].innerHTML = board[i];
     if (columns[i].innerHTML === HUMAN) columns[i].style.color = '#be0000';
@@ -144,9 +153,9 @@ const displayResult = function (turnValue) {
 
 function startMove(event) {
   let index = event.target.dataset.value,
-      bestScore = -INFINITY,
-      bestIndex = -1,
-      score;
+    bestScore = -INFINITY,
+    bestIndex = -1,
+    score;
 
   updateBoard(index, HUMAN);
   if (displayResult(turnValue)) return true;
@@ -173,5 +182,5 @@ const beginGame = function () {
   });
 };
 
-updateBoard();
+// updateBoard();
 beginGame();

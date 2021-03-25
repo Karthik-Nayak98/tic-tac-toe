@@ -1,7 +1,9 @@
 :root {
-  --color-light: #fff;
-  --color-primary: #e8e8e8;
+  --color-light-1: #fff;
+  --color-light-2: #e8e8e8;
+  --color-light-3: #d8ebe4;
   --color-dark: #6b011f;
+  --color-button: #0033cc;
 }
 
 * {
@@ -11,7 +13,7 @@
 }
 
 body {
-  background-color: var(--color-primary);
+  background-color: var(--color-light-2);
 }
 
 h2 {
@@ -67,7 +69,7 @@ h2 {
 .winner {
   margin: 1rem;
   font-size: 1.5rem;
-  color: #0033cc;
+  color: var(--color-button);
 }
 
 .restart {
@@ -79,6 +81,6 @@ h2 {
   border-radius: 0.3rem;
   border: none;
   outline: none;
-  color: #d8ebe4;
+  color: var(--color-light-3);
   cursor: pointer;
 }
